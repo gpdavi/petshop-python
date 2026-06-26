@@ -1,10 +1,10 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from datetime import date
-
 from models.pet import Pet, Cachorro, Gato, Ave, Reptil, Roedor
 from controllers.Dados import Dados
 from views.PetEdit import PetEdit
+from views.PetHistorico import PetHistorico
 
 
 class PetList:
@@ -13,25 +13,19 @@ class PetList:
         self.parent_window = parent_window
         self.master.title("Lista de Pets")
         self.master.geometry("950x450")
-
         tk.Label(master, text="Lista de Pets", font=("Arial", 16)).pack(pady=10)
-
         frame_topo = tk.Frame(master)
         frame_topo.pack(fill="x", padx=10)
-
         tk.Button(frame_topo, text="Voltar", bg="#d3d3d3", command=self.voltar).pack(side="left")
         tk.Button(frame_topo, text="Editar Selecionado", bg="#80DD83", command=self.abrir_edicao).pack(side="right")
-
+        tk.Button(frame_topo, text="Ver Histórico", bg="#7FB3FF", command=self.abrir_historico).pack(side="right", padx=6)
         colunas = ("Código", "Nome", "Espécie", "Raça", "Idade", "Peso", "Tutor CPF", "Status")
         self.tabela = ttk.Treeview(master, columns=colunas, show="headings")
-
         for col in colunas:
             self.tabela.heading(col, text=col)
             self.tabela.column(col, width=110, anchor="center")
-
         self.tabela.pack(fill="both", expand=True, padx=10, pady=10)
         self.tabela.bind("<Double-1>", lambda e: self.abrir_edicao())
-
         self.carregar()
 
     def calcular_idade(self, data_nascimento_str):
@@ -48,7 +42,6 @@ class PetList:
     def carregar(self):
         for item in self.tabela.get_children():
             self.tabela.delete(item)
-
         for pet in Dados.load("pets.json"):
             self.tabela.insert("", "end", values=(
                 pet.get("codigo"),
@@ -61,22 +54,33 @@ class PetList:
                 pet.get("status"),
             ))
 
-    def abrir_edicao(self):
+    def _pet_selecionado(self):
+        """Retorna o dict do pet selecionado na tabela, ou None se nada estiver selecionado."""
         selecionado = self.tabela.selection()
         if not selecionado:
-            messagebox.showwarning("Aviso", "Selecione um pet para editar.")
-            return
-
+            messagebox.showwarning("Aviso", "Selecione um pet.", parent=self.master)
+            return None
         codigo = self.tabela.item(selecionado[0])["values"][0]
         pets = Dados.load("pets.json")
         pet = next((a for a in pets if a["codigo"] == str(codigo)), None)
-
         if not pet:
-            messagebox.showerror("Erro", "Pet não encontrado.")
-            return
+            messagebox.showerror("Erro", "Pet não encontrado.", parent=self.master)
+            return None
+        return pet
 
+    def abrir_edicao(self):
+        pet = self._pet_selecionado()
+        if not pet:
+            return
         top = tk.Toplevel(self.master)
         PetEdit(top, pet, parent_list=self)
+
+    def abrir_historico(self):
+        pet = self._pet_selecionado()
+        if not pet:
+            return
+        top = tk.Toplevel(self.master)
+        PetHistorico(top, pet)
 
     def voltar(self):
         if self.parent_window:
