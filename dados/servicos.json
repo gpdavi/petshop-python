@@ -1,0 +1,13 @@
+[
+    {
+        "codigo": "1",
+        "nome": "Cirurgia",
+        "tipo": "consulta veterinária",
+        "descricao": "Cirurgia",
+        "valor_base": 500.0,
+        "duracao": 60,
+        "requer_agendamento": true,
+        "veterinario": "Rogeio",
+        "especialidade": "Cirurgia"
+    }
+]

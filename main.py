@@ -18,3 +18,5 @@ if __name__ == "__main__":
 
 Dados.create("tutores.json")
 Dados.create("pets.json")
+Dados.create("servicos.json")
+Dados.create("agendamentos.json")
